@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	fl "NewPipeLine/feature_logging"
 	"NewPipeLine/structures"
 	"bufio"
 	"fmt"
@@ -26,12 +27,15 @@ func (sR *StdinReader) Read(needText, errText string)int{
 		fmt.Println(needText)
 		sR.sc.Scan()
 		val, err = strconv.Atoi(sR.sc.Text())
+		fl.InfoLogging("MyInput, the entered value is being processed ")
 		if err != nil{
+			fl.InfoLogging("MyInput, entered value is wrong ")
 			fmt.Println(errText)
 			continue
 		}
 		break
 	}
+	fl.InfoLogging("MyInput, got value ")
 	return val
 }
 
@@ -71,6 +75,7 @@ func (mI *MyInput) GetInputBuff() *structures.TSafeSlice {
 
 func (mI *MyInput) Start(wg *sync.WaitGroup)<-chan int{
 
+	fl.InfoLogging("MyInput Started")
 
 	var stopVal int  // значение остановки горутины опросника опросника
 
@@ -80,8 +85,10 @@ func (mI *MyInput) Start(wg *sync.WaitGroup)<-chan int{
 		defer wg.Done()
 		for {
 			num := mI.Read("Введите значение для обработки", "Значение не распознано")
+
 			if num == stopVal{
 				fmt.Println("the final value is entered, the program is ending")
+				fl.InfoLogging("the final value is entered, the program is ending")
 				close(mI.readForOut)
 				break
 			}
@@ -121,13 +128,16 @@ func (mO *Output) Start(ch <-chan int , slInput *structures.TSafeSlice){
 	go func(){
 
 		for val := range ch{
+			fl.InfoLogging(fmt.Sprintf("MyOutput, get value: %v", val))
 			mO.buff.Put(val)
 		}
 	}()
+	fl.InfoLogging("MyOutput started")
 	go func(){
 		for{
 			time.Sleep(time.Second * time.Duration(mO.releaseBuffPer))
 			res, numOfErr := mO.buff.Unload()
+			fl.InfoLogging(fmt.Sprintf("MyOutput, unloaded.."))
 
 			fmt.Printf("Введено: %v за период  %v сек, получено : %v, не поместилось в буфер: %v\n",
 				*slInput.Result() , mO.releaseBuffPer, *res, numOfErr)
