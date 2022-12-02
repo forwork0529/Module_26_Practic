@@ -1,8 +1,10 @@
 package steps
 
 import (
+	fl "NewPipeLine/feature_logging"
 	fu "NewPipeLine/functions"
 	"NewPipeLine/structures"
+	"fmt"
 )
 
 
@@ -37,15 +39,19 @@ func (s *Step) Start2(ch <-chan int)<-chan int{
 		go func(chIN, chOUT chan int  ) {
 			defer close(chOUT)
 			for val := range chIN{
+				fl.InfoLogging(fmt.Sprintf("Step, step %v got value: %v ", s.f, val))
 				if s.f(val){
+					fl.InfoLogging(fmt.Sprintf("Step, step %v value %v accepted", s.f, val))
 					chOUT <- val
-
+					continue
 				}
+				fl.InfoLogging(fmt.Sprintf("Step, step %v value %v discarded", s.f, val))
 			}
 		}(splitChannels[i], toMuxChannels[i])
 	}
 
 	toOutputChan := structures.MultiplexingFunc(toMuxChannels...)
+	fl.InfoLogging("Step of PipeLine, prepared a pull of channels")
 	return toOutputChan
 }
 
@@ -80,5 +86,6 @@ func (pl *pipeLine) Start(nGo int)<-chan int{							// Стартуя конве
 		prevStepChan = step.Start2(prevStepChan)							// Выходной канал шага сохраняем как предидущий
 
 	}
+	fl.InfoLogging("PipeLine as build order ")
 	return prevStepChan
 }
