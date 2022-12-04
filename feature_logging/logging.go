@@ -7,7 +7,7 @@ import(
 
 // Конфигурирование логирования через переменные:
 var loggerOn = true
-var addLogToFile = false
+var addLogToFile = true
 var infoLog *log.Logger
 var F *os.File
 
