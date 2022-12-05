@@ -4,7 +4,7 @@ WORKDIR /go/src/NewPipeLine
 ADD /. .
 RUN go install .
 
-FROM alpine:latest
+FROM blang/alpine-bash
 LABEL version="1.0.0"
 LABEL maintainer="Ilya<test@test.ru>"
 WORKDIR /root/
