@@ -9,5 +9,5 @@ LABEL version="1.0.0"
 LABEL maintainer="Ilya<test@test.ru>"
 WORKDIR /root/
 COPY --from=0 /go/bin/NewPipeLine .
-ENTRYPOINT ./NewPipeLine
+ENTRYPOINT /bin/sh
 EXPOSE 8080
